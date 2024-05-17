@@ -4,7 +4,7 @@ void I2CS_Init(void)
 		    GPIO_InitTypeDef gpio_initstruct;
     __HAL_RCC_GPIOC_CLK_ENABLE();                          /* IO口PB时钟使能 */
 	
-    gpio_initstruct.Pin = GPIO_PIN_14|GPIO_PIN_15;                      /* SCK,SDA引脚 */
+    gpio_initstruct.Pin = GPIO_PIN_15|GPIO_PIN_13;                      /* SCK,SDA引脚 */
     gpio_initstruct.Mode = GPIO_MODE_OUTPUT_PP;            /* 推挽输出 */
     gpio_initstruct.Pull = GPIO_PULLUP;                    /* 上拉 */
     gpio_initstruct.Speed = GPIO_SPEED_FREQ_HIGH;          /* 高速 */

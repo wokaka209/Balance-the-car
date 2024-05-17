@@ -18,9 +18,14 @@
  *                  MPU9250 (or MPU6500 w/ AK8963 on the auxiliary bus)
  */
 
+#include "main.h"
 #ifndef _INV_MPU_H_
 #define _INV_MPU_H_
-#include "stm32f10x.h"
+#define u8 uint8_t
+#define u16 uint16_t
+
+
+
 
 //定义输出速度
 #define DEFAULT_MPU_HZ  (100)		//100Hz
@@ -36,9 +41,12 @@
 struct int_param_s {
 //#if defined EMPL_TARGET_MSP430 || defined MOTION_DRIVER_TARGET_MSP430
     void (*cb)(void);
-    unsigned short pin;
-    unsigned char lp_exit;
-    unsigned char active_low;
+//    unsigned short pin;
+//    unsigned char lp_exit;
+//    unsigned char active_low;
+	  u16  pin;
+    u8 lp_exit;
+    u8 active_low;
 //#elif defined EMPL_TARGET_UC3L0
 //    unsigned long pin;
 //    void (*cb)(volatile void*);

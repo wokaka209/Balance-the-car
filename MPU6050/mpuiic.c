@@ -1,19 +1,16 @@
 #include "mpuiic.h"
-#include "delay.h"
-//////////////////////////////////////////////////////////////////////////////////	 
-//本程序只供学习使用，未经作者许可，不得用于其它任何用途
-//ALIENTEK精英STM32开发板V3
-//MPU6050 IIC驱动 代码	   
-//正点原子@ALIENTEK
-//技术论坛:www.openedv.com
-//创建日期:2015/1/17
-//版本：V1.0
-//版权所有，盗版必究。
-//Copyright(C) 广州市星翼电子科技有限公司 2009-2019
-//All rights reserved									  
-//////////////////////////////////////////////////////////////////////////////////
+#define u8 uint8_t
+
+void delay_us(uint32_t us)
+{
+    uint32_t delay = (HAL_RCC_GetHCLKFreq() / 4000000 * us);
+    while (delay--)
+	{
+		;
+	}
+}
  
-  //MPU IIC 延时函数
+ //MPU IIC 延时函数
 void MPU_IIC_Delay(void)
 {
 	delay_us(2);
@@ -22,16 +19,22 @@ void MPU_IIC_Delay(void)
 //初始化IIC
 void MPU_IIC_Init(void)
 {					     
-  GPIO_InitTypeDef  GPIO_InitStructure;
+
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 	
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);//先使能外设IO PORTC时钟 
-		
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12|GPIO_Pin_11;	 // 端口配置
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		 //IO口速度为50MHz
-  GPIO_Init(GPIOC, &GPIO_InitStructure);					 //根据设定参数初始化GPIO 
+
+  /*Configure GPIO pins : PA5 PB1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_10 | GPIO_PIN_11;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 	
-  GPIO_SetBits(GPIOC,GPIO_Pin_12|GPIO_Pin_11);						 //PB10,PB11 输出高	
+	
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10 | GPIO_PIN_11, GPIO_PIN_SET);
  
 }
 //产生IIC起始信号
@@ -52,7 +55,7 @@ void MPU_IIC_Stop(void)
 	MPU_IIC_SCL=0;
 	MPU_IIC_SDA=0;//STOP:when CLK is high DATA change form low to high
  	MPU_IIC_Delay();
-	MPU_IIC_SCL=1;  
+	MPU_IIC_SCL=1; 
 	MPU_IIC_SDA=1;//发送I2C总线结束信号
 	MPU_IIC_Delay();							   	
 }
@@ -112,10 +115,10 @@ void MPU_IIC_Send_Byte(u8 txd)
     {              
         MPU_IIC_SDA=(txd&0x80)>>7;
         txd<<=1; 	  
-		MPU_IIC_SCL=1;
-		MPU_IIC_Delay(); 
-		MPU_IIC_SCL=0;	
-		MPU_IIC_Delay();
+		    MPU_IIC_SCL=1;
+		    MPU_IIC_Delay(); 
+		    MPU_IIC_SCL=0;	
+		    MPU_IIC_Delay();
     }	 
 } 	    
 //读1个字节，ack=1时，发送ACK，ack=0，发送nACK   
@@ -133,11 +136,19 @@ u8 MPU_IIC_Read_Byte(unsigned char ack)
 		MPU_IIC_Delay(); 
     }					 
     if (!ack)
-        MPU_IIC_NAck();//发送nACK
+			    MPU_IIC_NAck();//发送nACK
     else
         MPU_IIC_Ack(); //发送ACK   
     return receive;
 }
+
+
+
+
+
+
+
+
 
 
 

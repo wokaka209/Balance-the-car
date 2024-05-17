@@ -22,8 +22,8 @@ float Med_Angle=0;//机械中值，能使得小车真正平衡住的角度
 
 
 /*UART 相关*/
-char Usart3_RX_Buf[50];  //串口接收数据缓存buf
-unsigned char Usart3_TX_Buf[50];
+//char Usart3_RX_Buf[50];  //串口接收数据缓存buf
+//unsigned char Usart3_TX_Buf[50];
 char temp[50]; 
 
 
@@ -261,14 +261,14 @@ void set_up(void)
    HAL_TIM_Base_Start_IT(&htim2);//每10ms触发一次中断 
   
    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);//PWM
-	 HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);	
+	 HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);	
   
 	 HAL_TIM_Encoder_Start(&htim3,TIM_CHANNEL_1);//编码器
 	 HAL_TIM_Encoder_Start(&htim3,TIM_CHANNEL_2);
 	 HAL_TIM_Encoder_Start(&htim4,TIM_CHANNEL_1);
 	 HAL_TIM_Encoder_Start(&htim4,TIM_CHANNEL_2);	
 
-	HAL_UARTEx_ReceiveToIdle_IT(&huart3, (uint8_t *)Usart3_RX_Buf,50);
+//	HAL_UARTEx_ReceiveToIdle_IT(&huart3, (uint8_t *)Usart3_RX_Buf,50);
 	
 		OLED_Init();	
   	OLED_Clear();	
@@ -444,11 +444,11 @@ int Turn(float gyro)
 ******************************************************************************/
 void Contrl(void)
 {
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, BIN1);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, BIN2);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, BIN1);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, BIN2);
 	
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, AIN1);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, AIN2);	
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_14, AIN1);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, AIN2);	
 		
 
 }
@@ -494,13 +494,13 @@ void Set_Pwm(int Moto1,int Moto2)
 			
 			if(Moto2>0)  BIN1 = 0,BIN2 = 1;		
 			else		    BIN1 = 1 ,BIN2 = 0;
-    		__HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,abs(Moto2)); //0-7200
+    		__HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_1,abs(Moto2)); //0-7200
 		}
 			
 		else//倒下就关闭电机
 		{
 		   __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_1,0);	//4500-6000
-		   __HAL_TIM_SET_COMPARE(&htim1,TIM_CHANNEL_4,0);	//4500-6000
+		   __HAL_TIM_SET_COMPARE(&htim8,TIM_CHANNEL_1,0);	//4500-6000
 		}
 		 Contrl();
 	}
@@ -602,35 +602,35 @@ void XunJi(void)//xun = 1 检测到白线， xun = 0 检测到黑线
 引脚：		 
 **************************************************************************/
 //串口空闲中断回调函数
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)	
-{
-	if(strcmp(Usart3_RX_Buf,"1")==0)
-	{
-			jizhi();
-	}
-	else if(strcmp(Usart3_RX_Buf,"2")==0)
-	{
-			Flag_forward = 1,Flag_retreat = 0;
-	}
-	else if(strcmp(Usart3_RX_Buf,"3")==0)
-	{
-		right();
-	}	
-	else if(strcmp(Usart3_RX_Buf,"4")==0)
-	{
-			left();
-	}	
-	else if(strcmp(Usart3_RX_Buf,"5")==0)
-	{
-		  Flag_retreat = 1, Flag_forward = 0;
-	}		
-	else if(strcmp(Usart3_RX_Buf,"6")==0)
-	{
-			BigRight();
-	}	
-	else if(strcmp(Usart3_RX_Buf,"7")==0)
-	{
-		  BigLeft();
-	}			
-		HAL_UARTEx_ReceiveToIdle_IT(&huart3, (uint8_t *)Usart3_RX_Buf,50);				
-}
+//void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)	
+//{
+//	if(strcmp(Usart3_RX_Buf,"1")==0)
+//	{
+//			jizhi();
+//	}
+//	else if(strcmp(Usart3_RX_Buf,"2")==0)
+//	{
+//			Flag_forward = 1,Flag_retreat = 0;
+//	}
+//	else if(strcmp(Usart3_RX_Buf,"3")==0)
+//	{
+//		right();
+//	}	
+//	else if(strcmp(Usart3_RX_Buf,"4")==0)
+//	{
+//			left();
+//	}	
+//	else if(strcmp(Usart3_RX_Buf,"5")==0)
+//	{
+//		  Flag_retreat = 1, Flag_forward = 0;
+//	}		
+//	else if(strcmp(Usart3_RX_Buf,"6")==0)
+//	{
+//			BigRight();
+//	}	
+//	else if(strcmp(Usart3_RX_Buf,"7")==0)
+//	{
+//		  BigLeft();
+//	}			
+//		HAL_UARTEx_ReceiveToIdle_IT(&huart3, (uint8_t *)Usart3_RX_Buf,50);				
+//}

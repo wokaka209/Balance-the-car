@@ -1,43 +1,43 @@
 #include "mpu6050.h"
-#include "sys.h"
-#include "delay.h"
-#include "usart.h"   
-//////////////////////////////////////////////////////////////////////////////////	 
-//本程序只供学习使用，未经作者许可，不得用于其它任何用途
-//ALIENTEK MiniSTM32F103开发板 
-//MPU6050 驱动代码	   
-//正点原子@ALIENTEK
-//技术论坛:www.openedv.com
-//创建日期:2015/4/18
-//版本：V1.0
-//版权所有，盗版必究。
-//Copyright(C) 广州市星翼电子科技有限公司 2009-2019
-//All rights reserved									  
-////////////////////////////////////////////////////////////////////////////////// 
- 
-//初始化MPU6050
-//返回值:0,成功
-//    其他,错误代码
+ #include "main.h"
+
 u8 MPU_Init(void)
 { 
-	u8 res; 
+	u8 res;
+   GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  /* GPIO Ports Clock Enable */
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+  /*Configure GPIO pin Output Level */
+
+  /*Configure GPIO pins : PB0 PB1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_10 | GPIO_PIN_11;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+//禁止JTAG,从而PA15可以做普通IO使用,否则PA15不能做普通IO!!!
+	
+//	MPU_AD0_CTRL=0;			//控制MPU6050的AD0脚为低电平,从机地址为:0X68
+	
 	MPU_IIC_Init();//初始化IIC总线
 	MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X80);	//复位MPU6050
-    delay_ms(100);
+  HAL_Delay (100);
 	MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X00);	//唤醒MPU6050 
 	MPU_Set_Gyro_Fsr(3);					//陀螺仪传感器,±2000dps
 	MPU_Set_Accel_Fsr(0);					//加速度传感器,±2g
-	MPU_Set_Rate(50);						//设置采样率50Hz
+	MPU_Set_Rate(100);						//设置采样率50Hz
 	MPU_Write_Byte(MPU_INT_EN_REG,0X00);	//关闭所有中断
 	MPU_Write_Byte(MPU_USER_CTRL_REG,0X00);	//I2C主模式关闭
 	MPU_Write_Byte(MPU_FIFO_EN_REG,0X00);	//关闭FIFO
 	MPU_Write_Byte(MPU_INTBP_CFG_REG,0X80);	//INT引脚低电平有效
-	res=MPU_Read_Byte(MPU_DEVICE_ID_REG); 
+	res=MPU_Read_Byte(MPU_DEVICE_ID_REG);
 	if(res==MPU_ADDR)//器件ID正确
 	{
 		MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X01);	//设置CLKSEL,PLL X轴为参考
 		MPU_Write_Byte(MPU_PWR_MGMT2_REG,0X00);	//加速度与陀螺仪都工作
-		MPU_Set_Rate(50);						//设置采样率为50Hz
+		MPU_Set_Rate(100);						//设置采样率为50Hz
  	}else return 1;
 	return 0;
 }
@@ -170,7 +170,7 @@ u8 MPU_Write_Len(u8 addr,u8 reg,u8 len,u8 *buf)
 //    其他,错误代码
 u8 MPU_Read_Len(u8 addr,u8 reg,u8 len,u8 *buf)
 { 
- 	MPU_IIC_Start(); 
+ 	MPU_IIC_Start();  
 	MPU_IIC_Send_Byte((addr<<1)|0);//发送器件地址+写命令	
 	if(MPU_IIC_Wait_Ack())	//等待应答
 	{

@@ -1,19 +1,14 @@
 #ifndef __MPU6050_H
 #define __MPU6050_H
-#include "mpuiic.h"   												  	  
-//////////////////////////////////////////////////////////////////////////////////	 
-//本程序只供学习使用，未经作者许可，不得用于其它任何用途
-//ALIENTEK MiniSTM32F103开发板 
-//MPU6050 驱动代码	   
-//正点原子@ALIENTEK
-//技术论坛:www.openedv.com
-//创建日期:2015/4/18
-//版本：V1.0
-//版权所有，盗版必究。
-//Copyright(C) 广州市星翼电子科技有限公司 2009-2019
-//All rights reserved									  
-////////////////////////////////////////////////////////////////////////////////// 
-  
+#include "mpuiic.h" 
+#include "stm32f1xx_hal.h"
+#include "main.h"
+#define u8 uint8_t
+#define u16 uint16_t
+
+//MPU6050 AD0控制脚
+//#define MPU_AD0_CTRL			PAout(15)	//控制AD0电平,从而控制MPU地址
+
 //#define MPU_ACCEL_OFFS_REG		0X06	//accel_offs寄存器,可读取版本号,寄存器手册未提到
 //#define MPU_PROD_ID_REG			0X0C	//prod id寄存器,在寄存器手册未提到
 #define MPU_SELF_TESTX_REG		0X0D	//自检寄存器X
@@ -108,6 +103,7 @@ u8 MPU_Set_Fifo(u8 sens);
 short MPU_Get_Temperature(void);
 u8 MPU_Get_Gyroscope(short *gx,short *gy,short *gz);
 u8 MPU_Get_Accelerometer(short *ax,short *ay,short *az);
+u8 MPU_Get_AccelerMPU_Get_Gyroscopeometer(short *ax,short *ay,short *az);
 
 #endif
 

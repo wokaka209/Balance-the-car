@@ -25,8 +25,7 @@
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
 #include "mpu6050.h"
-#include "delay.h"
-#include "usart.h"
+
 
 
 #define MPU6050							//定义我们使用的传感器为MPU6050
@@ -59,8 +58,8 @@
 //    return msp430_reg_int_cb(int_param->cb, int_param->pin, int_param->lp_exit,
 //        int_param->active_low);
 //}
-#define log_i 	printf	//打印信息
-#define log_e  	printf	//打印信息
+//#define log_i 	printf	//打印信息
+//#define log_e  	printf	//打印信息
 /* labs is already defined by TI's toolchain. */
 /* fabs is for doubles. fabsf is for floats. */
 #define fabs        fabsf
@@ -80,8 +79,8 @@ static inline int reg_int_cb(struct int_param_s *int_param)
     return msp430_reg_int_cb(int_param->cb, int_param->pin, int_param->lp_exit,
         int_param->active_low);
 }
-#define log_i       MPL_LOGI
-#define log_e       MPL_LOGE
+//#define log_i       MPL_LOGI
+//#define log_e       MPL_LOGE
 /* labs is already defined by TI's toolchain. */
 /* fabs is for doubles. fabsf is for floats. */
 #define fabs        fabsf
@@ -91,7 +90,6 @@ static inline int reg_int_cb(struct int_param_s *int_param)
  * a TWI driver that follows the slave address + register address convention.
  */
 #include "twi.h"
-#include "delay.h"
 #include "sysclk.h"
 #include "log.h"
 #include "sensors_xplained.h"
@@ -725,7 +723,7 @@ int mpu_reg_dump(void)
             continue;
         if (i2c_read(st.hw->addr, ii, 1, &data))
             return -1;
-        log_i("%#5x: %#5x\r\n", ii, data);
+//        log_i("%#5x: %#5x\r\n", ii, data);
     }
     return 0;
 }
@@ -767,7 +765,7 @@ int mpu_init(void)
     data[0] = BIT_RESET;
     if (i2c_write(st.hw->addr, st.reg->pwr_mgmt_1, 1, data))
         return -1;
-    delay_ms(100);
+    HAL_Delay (100);
 
     /* Wake up chip. */
     data[0] = 0x00;
@@ -788,7 +786,7 @@ int mpu_init(void)
         else if (rev == 2)
             st.chip_cfg.accel_half = 0;
         else {
-            log_e("Unsupported software product rev %d.\n", rev);
+            //log_e("Unsupported software product rev %d.\n", rev);
             return -1;
         }
     } else {
@@ -796,11 +794,11 @@ int mpu_init(void)
             return -1;
         rev = data[0] & 0x0F;
         if (!rev) {
-            log_e("Product ID read as 0 indicates device is either "
-                "incompatible or an MPU3050.\n");
+            //log_e("Product ID read as 0 indicates device is either "
+               // "incompatible or an MPU3050.\n");
             return -1;
         } else if (rev == 4) {
-            log_i("Half sensitivity part found.\n");
+//            log_i("Half sensitivity part found.\n");
             st.chip_cfg.accel_half = 1;
         } else
             st.chip_cfg.accel_half = 0;
@@ -853,7 +851,7 @@ int mpu_init(void)
         return -1;
     if (mpu_set_lpf(42))
         return -1;
-    if (mpu_set_sample_rate(50))
+    if (mpu_set_sample_rate(200))
         return -1;
     if (mpu_configure_fifo(0))
         return -1;
@@ -1113,7 +1111,7 @@ int mpu_reset_fifo(void)
         data = BIT_FIFO_RST | BIT_DMP_RST;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &data))
             return -1;
-        delay_ms(50);
+        HAL_Delay (50);
         data = BIT_DMP_EN | BIT_FIFO_EN;
         if (st.chip_cfg.sensors & INV_XYZ_COMPASS)
             data |= BIT_AUX_IF_EN;
@@ -1138,7 +1136,7 @@ int mpu_reset_fifo(void)
             data = BIT_FIFO_EN | BIT_AUX_IF_EN;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &data))
             return -1;
-        delay_ms(50);
+        HAL_Delay (50);
         if (st.chip_cfg.int_enable)
             data = BIT_DATA_RDY_EN;
         else
@@ -1662,7 +1660,7 @@ int mpu_set_sensors(unsigned char sensors)
 
     st.chip_cfg.sensors = sensors;
     st.chip_cfg.lp_accel_mode = 0;
-    delay_ms(50);
+    HAL_Delay (50);
     return 0;
 }
 
@@ -1832,7 +1830,7 @@ int mpu_set_bypass(unsigned char bypass_on)
         tmp &= ~BIT_AUX_IF_EN;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
             return -1;
-        delay_ms(3);
+        HAL_Delay (3);
         tmp = BIT_BYPASS_EN;
         if (st.chip_cfg.active_low_int)
             tmp |= BIT_ACTL;
@@ -1850,7 +1848,7 @@ int mpu_set_bypass(unsigned char bypass_on)
             tmp &= ~BIT_AUX_IF_EN;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &tmp))
             return -1;
-        delay_ms(3);
+        HAL_Delay (3);
         if (st.chip_cfg.active_low_int)
             tmp = BIT_ACTL;
         else
@@ -2041,7 +2039,7 @@ static int get_st_biases(long *gyro, long *accel, unsigned char hw_test)
     data[1] = 0;
     if (i2c_write(st.hw->addr, st.reg->pwr_mgmt_1, 2, data))
         return -1;
-    delay_ms(200);
+    HAL_Delay (200);
     data[0] = 0;
     if (i2c_write(st.hw->addr, st.reg->int_enable, 1, data))
         return -1;
@@ -2056,7 +2054,7 @@ static int get_st_biases(long *gyro, long *accel, unsigned char hw_test)
     data[0] = BIT_FIFO_RST | BIT_DMP_RST;
     if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, data))
         return -1;
-    delay_ms(15);
+    HAL_Delay (15);
     data[0] = st.test->reg_lpf;
     if (i2c_write(st.hw->addr, st.reg->lpf, 1, data))
         return -1;
@@ -2077,7 +2075,7 @@ static int get_st_biases(long *gyro, long *accel, unsigned char hw_test)
     if (i2c_write(st.hw->addr, st.reg->accel_cfg, 1, data))
         return -1;
     if (hw_test)
-        delay_ms(200);
+        HAL_Delay (200);
 
     /* Fill FIFO for test.wait_ms milliseconds. */
     data[0] = BIT_FIFO_EN;
@@ -2087,7 +2085,7 @@ static int get_st_biases(long *gyro, long *accel, unsigned char hw_test)
     data[0] = INV_XYZ_GYRO | INV_XYZ_ACCEL;
     if (i2c_write(st.hw->addr, st.reg->fifo_en, 1, data))
         return -1;
-    delay_ms(test.wait_ms);
+    HAL_Delay (test.wait_ms);
     data[0] = 0;
     if (i2c_write(st.hw->addr, st.reg->fifo_en, 1, data))
         return -1;
@@ -2732,7 +2730,7 @@ int mpu_lp_motion_interrupt(unsigned short thresh, unsigned char time,
             goto lp_int_restore;
 
         /* Force hardware to "lock" current accel sample. */
-        delay_ms(5);
+        HAL_Delay (5);
         data[0] = (st.chip_cfg.accel_fsr << 3) | BITS_HPF;
         if (i2c_write(st.hw->addr, st.reg->accel_cfg, 1, data))
             goto lp_int_restore;
@@ -2855,7 +2853,7 @@ lp_int_restore:
 //添加的代码部分 
 //////////////////////////////////////////////////////////////////////////////////	 
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
-//ALIENTEK精英STM32开发板V3
+//ALIENTEK战舰STM32开发板V3
 //MPU6050 DMP 驱动代码	   
 //正点原子@ALIENTEK
 //技术论坛:www.openedv.com
@@ -2956,13 +2954,15 @@ u8 mpu_dmp_init(void)
 {
 	u8 res=0;
 	MPU_IIC_Init(); 	//初始化IIC总线
+
 	if(mpu_init()==0)	//初始化MPU6050
 	{	 
 		res=mpu_set_sensors(INV_XYZ_GYRO|INV_XYZ_ACCEL);//设置所需要的传感器
 		if(res)return 1; 
 		res=mpu_configure_fifo(INV_XYZ_GYRO|INV_XYZ_ACCEL);//设置FIFO
 		if(res)return 2; 
-		res=mpu_set_sample_rate(DEFAULT_MPU_HZ);	//设置采样率
+//		res=mpu_set_sample_rate(DEFAULT_MPU_HZ);	//设置采样率
+		res=mpu_set_sample_rate(100);	//设置采样率
 		if(res)return 3; 
 		res=dmp_load_motion_driver_firmware();		//加载dmp固件
 		if(res)return 4; 
@@ -2972,7 +2972,8 @@ u8 mpu_dmp_init(void)
 		    DMP_FEATURE_ANDROID_ORIENT|DMP_FEATURE_SEND_RAW_ACCEL|DMP_FEATURE_SEND_CAL_GYRO|
 		    DMP_FEATURE_GYRO_CAL);
 		if(res)return 6; 
-		res=dmp_set_fifo_rate(DEFAULT_MPU_HZ);	//设置DMP输出速率(最大不超过200Hz)
+		res=dmp_set_fifo_rate(100);	//设置DMP输出速率(最大不超过200Hz)  200hz
+//		res=dmp_set_fifo_rate(DEFAULT_MPU_HZ);	//设置DMP输出速率(最大不超过200Hz)
 		if(res)return 7;   
 		res=run_self_test();		//自检
 		if(res)return 8;    
@@ -2994,7 +2995,8 @@ u8 mpu_dmp_get_data(float *pitch,float *roll,float *yaw)
 	short gyro[3], accel[3], sensors;
 	unsigned char more;
 	long quat[4]; 
-	if(dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors,&more))return 1;	 
+	dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors,&more);
+	if(dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors,&more)) return 1;	 
 	/* Gyro and accel data are written to the FIFO by the DMP in chip frame and hardware units.
 	 * This behavior is convenient because it keeps the gyro and accel outputs of dmp_read_fifo and mpu_read_fifo consistent.
 	**/

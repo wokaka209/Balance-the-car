@@ -23,8 +23,7 @@
 #include "inv_mpu_dmp_motion_driver.h"
 #include "dmpKey.h"
 #include "dmpmap.h"
-#include "usart.h"
-#include "delay.h"
+
 
 //定义目标板采用MSP430
 #define  MOTION_DRIVER_TARGET_MSP430
@@ -42,8 +41,8 @@
 //#include "msp430_clock.h"
 #define delay_ms    delay_ms
 #define get_ms      mget_ms
-#define log_i 		printf
-#define log_e  		printf
+//#define log_i 		printf
+//#define log_e  		printf
 
 #elif defined EMPL_TARGET_MSP430
 #include "msp430.h"
@@ -1270,6 +1269,7 @@ int dmp_set_interrupt_mode(unsigned char mode)
 int dmp_read_fifo(short *gyro, short *accel, long *quat,
     unsigned long *timestamp, short *sensors, unsigned char *more)
 {
+		dmp_load_motion_driver_firmware();//
     unsigned char fifo_data[MAX_PACKET_LENGTH];
     unsigned char ii = 0;
 
